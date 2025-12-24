@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarEase - Student Car Rental Melbourne</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.page { display: none; }
+.page.active { display: block; }
+.glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+.gradient-overlay { background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%); }
+</style>
+</head>
+<body class="bg-gray-50">
+
+<script>
+// DEMO DATA - 50 Cars!
+const DEMO_CARS = [
+  {id:1,make:"Toyota",model:"Corolla",year:2020,category:"economy",price:30,location:"Carlton",rating:4.7,reviews:23,image:"🚗"},
+  {id:2,make:"Mazda",model:"3",year:2021,category:"economy",price:32,location:"Fitzroy",rating:4.6,reviews:18,image:"🚗"},
+  {id:3,make:"Honda",model:"Civic",year:2019,category:"economy",price:30,location:"Collingwood",rating:4.8,reviews:31,image:"🚗"},
+  {id:4,make:"Hyundai",model:"i30",year:2020,category:"economy",price:28,location:"Richmond",rating:4.5,reviews:15,image:"🚗"},
+  {id:5,make:"Volkswagen",model:"Golf",year:2021,category:"economy",price:35,location:"South Yarra",rating:4.7,reviews:28,image:"🚗"},
+  {id:6,make:"Toyota",model:"Camry",year:2020,category:"economy",price:32,location:"St Kilda",rating:4.6,reviews:22,image:"🚗"},
+  {id:7,make:"Mazda",model:"2",year:2019,category:"economy",price:26,location:"Brighton",rating:4.4,reviews:12,image:"🚗"},
+  {id:8,make:"Honda",model:"Jazz",year:2021,category:"economy",price:28,location:"Caulfield",rating:4.5,reviews:19,image:"🚗"},
+  {id:9,make:"Kia",model:"Cerato",year:2020,category:"economy",price:29,location:"Preston",rating:4.6,reviews:16,image:"🚗"},
+  {id:10,make:"Nissan",model:"Pulsar",year:2019,category:"economy",price:27,location:"Brunswick",rating:4.4,reviews:14,image:"🚗"},
+  
+  {id:11,make:"Mercedes-Benz",model:"C-Class",year:2022,category:"luxury",price:100,location:"South Yarra",rating:4.9,reviews:45,image:"🏎️"},
+  {id:12,make:"BMW",model:"3 Series",year:2021,category:"luxury",price:95,location:"Brighton",rating:4.8,reviews:38,image:"🏎️"},
+  {id:13,make:"Audi",model:"A4",year:2022,category:"luxury",price:90,location:"Kew",rating:4.9,reviews:42,image:"🏎️"},
+  {id:14,make:"Lexus",model:"IS",year:2021,category:"luxury",price:85,location:"Hawthorn",rating:4.7,reviews:35,image:"🏎️"},
+  {id:15,make:"Mercedes-Benz",model:"E-Class",year:2023,category:"luxury",price:120,location:"Docklands",rating:5.0,reviews:51,image:"🏎️"},
+  {id:16,make:"BMW",model:"5 Series",year:2022,category:"luxury",price:110,location:"Carlton",rating:4.8,reviews:40,image:"🏎️"},
+  {id:17,make:"Audi",model:"A6",year:2021,category:"luxury",price:105,location:"Fitzroy",rating:4.9,reviews:44,image:"🏎️"},
+  {id:18,make:"Lexus",model:"ES",year:2022,category:"luxury",price:95,location:"Richmond",rating:4.8,reviews:37,image:"🏎️"},
+  {id:19,make:"Volvo",model:"S60",year:2021,category:"luxury",price:88,location:"St Kilda",rating:4.7,reviews:33,image:"🏎️"},
+  {id:20,make:"Genesis",model:"G70",year:2022,category:"luxury",price:92,location:"Elwood",rating:4.8,reviews:29,image:"🏎️"},
+  
+  {id:21,make:"Toyota",model:"RAV4",year:2021,category:"suv",price:70,location:"Glen Waverley",rating:4.7,reviews:41,image:"🚙"},
+  {id:22,make:"Mazda",model:"CX-5",year:2022,category:"suv",price:65,location:"Box Hill",rating:4.8,reviews:38,image:"🚙"},
+  {id:23,make:"Honda",model:"CR-V",year:2020,category:"suv",price:68,location:"Northcote",rating:4.6,reviews:34,image:"🚙"},
+  {id:24,make:"Hyundai",model:"Tucson",year:2021,category:"suv",price:62,location:"Preston",rating:4.7,reviews:30,image:"🚙"},
+  {id:25,make:"Nissan",model:"X-Trail",year:2020,category:"suv",price:65,location:"Footscray",rating:4.5,reviews:28,image:"🚙"},
+  {id:26,make:"Subaru",model:"Outback",year:2021,category:"suv",price:72,location:"Williamstown",rating:4.8,reviews:36,image:"🚙"},
+  {id:27,make:"Mitsubishi",model:"Outlander",year:2020,category:"suv",price:60,location:"Carlton",rating:4.6,reviews:25,image:"🚙"},
+  {id:28,make:"Kia",model:"Sportage",year:2022,category:"suv",price:64,location:"Brighton",rating:4.7,reviews:32,image:"🚙"},
+  {id:29,make:"Ford",model:"Escape",year:2021,category:"suv",price:66,location:"Caulfield",rating:4.6,reviews:29,image:"🚙"},
+  {id:30,make:"Volkswagen",model:"Tiguan",year:2022,category:"suv",price:68,location:"Hawthorn",rating:4.8,reviews:35,image:"🚙"},
+  
+  {id:31,make:"BMW",model:"M4",year:2022,category:"sports",price:150,location:"South Yarra",rating:5.0,reviews:48,image:"🏁"},
+  {id:32,make:"Porsche",model:"911",year:2021,category:"sports",price:250,location:"Brighton",rating:5.0,reviews:52,image:"🏁"},
+  {id:33,make:"Audi",model:"RS5",year:2022,category:"sports",price:180,location:"Kew",rating:4.9,reviews:46,image:"🏁"},
+  {id:34,make:"Ford",model:"Mustang",year:2021,category:"sports",price:120,location:"St Kilda",rating:4.8,reviews:42,image:"🏁"},
+  {id:35,make:"Chevrolet",model:"Corvette",year:2020,category:"sports",price:200,location:"Docklands",rating:4.9,reviews:39,image:"🏁"},
+  
+  {id:36,make:"Tesla",model:"Model 3",year:2023,category:"electric",price:90,location:"Carlton",rating:4.9,reviews:55,image:"⚡"},
+  {id:37,make:"Tesla",model:"Model Y",year:2023,category:"electric",price:110,location:"Fitzroy",rating:5.0,reviews:58,image:"⚡"},
+  {id:38,make:"Nissan",model:"Leaf",year:2022,category:"electric",price:60,location:"Richmond",rating:4.6,reviews:31,image:"⚡"},
+  {id:39,make:"Hyundai",model:"IONIQ 5",year:2023,category:"electric",price:80,location:"Preston",rating:4.8,reviews:44,image:"⚡"},
+  {id:40,make:"Polestar",model:"2",year:2023,category:"electric",price:95,location:"South Yarra",rating:4.9,reviews:48,image:"⚡"},
+  {id:41,make:"MG",model:"ZS EV",year:2022,category:"electric",price:55,location:"Brunswick",rating:4.5,reviews:27,image:"⚡"},
+  {id:42,make:"Kia",model:"EV6",year:2023,category:"electric",price:85,location:"Northcote",rating:4.8,reviews:40,image:"⚡"},
+  {id:43,make:"BMW",model:"i4",year:2023,category:"electric",price:105,location:"Brighton",rating:4.9,reviews:43,image:"⚡"},
+  {id:44,make:"Audi",model:"e-tron",year:2022,category:"electric",price:100,location:"Kew",rating:4.8,reviews:38,image:"⚡"},
+  {id:45,make:"Mercedes-Benz",model:"EQC",year:2023,category:"electric",price:115,location:"Hawthorn",rating:4.9,reviews:41,image:"⚡"},
+  
+  {id:46,make:"Toyota",model:"HiAce",year:2020,category:"van",price:80,location:"Footscray",rating:4.6,reviews:36,image:"🚐"},
+  {id:47,make:"Volkswagen",model:"Transporter",year:2021,category:"van",price:75,location:"Williamstown",rating:4.7,reviews:32,image:"🚐"},
+  {id:48,make:"Mercedes-Benz",model:"Sprinter",year:2022,category:"van",price:100,location:"Port Melbourne",rating:4.8,reviews:40,image:"🚐"},
+  {id:49,make:"Ford",model:"Transit",year:2020,category:"van",price:85,location:"Docklands",rating:4.6,reviews:34,image:"🚐"},
+  {id:50,make:"Renault",model:"Master",year:2021,category:"van",price:78,location:"Brunswick",rating:4.5,reviews:28,image:"🚐"}
+];
+
+let currentCategory = 'all';
+let filteredCars = DEMO_CARS;
+
+function filterCars(category) {
+  currentCategory = category;
+  if (category === 'all') {
+    filteredCars = DEMO_CARS;
+  } else {
+    filteredCars = DEMO_CARS.filter(car => car.category === category);
+  }
+  displayCars();
+}
+
+function displayCars() {
+  const container = document.getElementById('carsGrid');
+  if (!container) return;
+  
+  container.innerHTML = filteredCars.map(car => `
+    <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition cursor-pointer" onclick="showCarDetail(${car.id})">
+      <div class="h-48 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-8xl">
+        ${car.image}
+      </div>
+      <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-1">${car.year} ${car.make} ${car.model}</h3>
+        <p class="text-sm text-gray-500 mb-2">📍 ${car.location}, Melbourne</p>
+        <p class="text-sm text-gray-500 mb-4">⭐ ${car.rating} (${car.reviews} reviews)</p>
+        <div class="border-t pt-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-600">Regular:</span>
+            <span class="text-gray-400 line-through">$${car.price * 2}/day</span>
+          </div>
+          <div class="flex justify-between items-center mb-4">
+            <span class="font-semibold text-gray-900">Student Price:</span>
+            <span class="text-3xl font-bold text-blue-600">$${car.price}<span class="text-lg">/day</span></span>
+          </div>
+          <div class="bg-green-50 border border-green-500 px-3 py-2 rounded-lg text-center">
+            <p class="text-green-700 text-sm font-semibold">🎓 You save $${car.price}/day!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showCarDetail(carId) {
+  const car = DEMO_CARS.find(c => c.id === carId);
+  if (!car) return;
+  
+  document.getElementById('detailImage').textContent = car.image;
+  document.getElementById('detailTitle').textContent = `${car.year} ${car.make} ${car.model}`;
+  document.getElementById('detailLocation').textContent = car.location;
+  document.getElementById('detailRating').textContent = `${car.rating} ⭐ (${car.reviews} reviews)`;
+  document.getElementById('detailRegularPrice').textContent = `$${car.price * 2}/day`;
+  document.getElementById('detailStudentPrice').textContent = `$${car.price}`;
+  document.getElementById('detailSavings').textContent = `$${car.price}`;
+  
+  showPage('detail');
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  
+  if (id === 'fleet') {
+    displayCars();
+  }
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  filterCars('all');
+});
+</script>
+
+<!-- Navigation -->
+<nav class="fixed top-0 w-full bg-white shadow-md z-50">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex justify-between items-center h-20">
+<div class="flex items-center gap-3 cursor-pointer" onclick="showPage('home')">
+<div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+<span class="text-white text-xl font-bold">CE</span>
+</div>
+<span class="text-2xl font-bold text-gray-800">CarEase</span>
+</div>
+
+<div class="hidden md:flex items-center gap-8">
+<a onclick="showPage('home')" class="cursor-pointer text-gray-600 hover:text-blue-600 transition">Home</a>
+<a onclick="showPage('fleet')" class="cursor-pointer text-gray-600 hover:text-blue-600 transition">Fleet (50 Cars!)</a>
+<a onclick="showPage('student')" class="cursor-pointer text-yellow-600 hover:text-yellow-700 transition font-semibold">🎓 50% OFF</a>
+</div>
+
+<div class="flex items-center gap-4">
+<button onclick="alert('Sign up coming soon!')" class="hidden md:block px-6 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition font-semibold">
+Join Now
+</button>
+<button onclick="alert('Login coming soon!')" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition font-semibold">
+Sign In
+</button>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="home" class="page active pt-20">
+<section class="relative h-screen flex items-center overflow-hidden">
+<div class="absolute inset-0">
+<img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1920&h=1080&fit=crop" class="w-full h-full object-cover">
+<div class="absolute inset-0 gradient-overlay"></div>
+</div>
+
+<div class="relative max-w-7xl mx-auto px-6 z-10 w-full">
+<div class="max-w-3xl">
+<div class="inline-block mb-6 px-6 py-3 glass rounded-full">
+<span class="text-yellow-400 font-semibold text-lg">🎓 Students Save 50% • 50 Cars Available!</span>
+</div>
+<h1 class="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
+Embark On The Journey<br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Your Dream Car Awaits</span>
+</h1>
+<p class="text-xl text-gray-200 mb-8">Browse 50 cars across Melbourne. From $26/day with student discount!</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button onclick="showPage('fleet')" class="px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-bold rounded-lg hover:shadow-2xl transition">
+Browse 50 Cars →
+</button>
+<button onclick="showPage('student')" class="px-10 py-4 glass text-white text-lg font-semibold rounded-lg hover:bg-white hover:bg-opacity-20 transition">
+Learn About 50% Discount
+</button>
+</div>
+</div>
+</div>
+</section>
+
+<section class="py-20 bg-gray-900 text-white">
+<div class="max-w-7xl mx-auto px-6">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+<div><div class="text-6xl font-bold mb-2">50</div><div class="text-gray-400">Cars Available</div></div>
+<div><div class="text-6xl font-bold mb-2">6</div><div class="text-gray-400">Categories</div></div>
+<div><div class="text-6xl font-bold mb-2">4.8★</div><div class="text-gray-400">Average Rating</div></div>
+<div><div class="text-6xl font-bold mb-2">50%</div><div class="text-gray-400">Student Discount</div></div>
+</div>
+</div>
+</section>
+
+<section class="py-20">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center mb-12">
+<h2 class="text-5xl font-bold text-gray-900 mb-4">Browse By Category</h2>
+<p class="text-xl text-gray-600">50 cars across 6 categories</p>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+<div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-8 text-white cursor-pointer hover:scale-105 transition" onclick="showPage('fleet'); filterCars('economy')">
+<div class="text-6xl mb-4">🚗</div>
+<h3 class="text-2xl font-bold mb-2">Economy</h3>
+<p class="mb-4">10 cars • From $26/day</p>
+<button class="w-full px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold">View Cars →</button>
+</div>
+
+<div class="bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-2xl p-8 text-white cursor-pointer hover:scale-105 transition" onclick="showPage('fleet'); filterCars('luxury')">
+<div class="text-6xl mb-4">🏎️</div>
+<h3 class="text-2xl font-bold mb-2">Luxury</h3>
+<p class="mb-4">10 cars • From $85/day</p>
+<button class="w-full px-6 py-3 bg-white text-yellow-600 rounded-lg font-semibold">View Cars →</button>
+</div>
+
+<div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-8 text-white cursor-pointer hover:scale-105 transition" onclick="showPage('fleet'); filterCars('electric')">
+<div class="text-6xl mb-4">⚡</div>
+<h3 class="text-2xl font-bold mb-2">Electric</h3>
+<p class="mb-4">10 cars • From $55/day</p>
+<button class="w-full px-6 py-3 bg-white text-green-600 rounded-lg font-semibold">View Cars →</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<!-- FLEET PAGE -->
+<div id="fleet" class="page pt-20">
+<section class="py-20">
+<div class="max-w-7xl mx-auto px-6">
+<h1 class="text-5xl font-bold text-gray-900 mb-4">Our Premium Fleet</h1>
+<p class="text-xl text-gray-600 mb-12">50 cars ready to rent across Melbourne</p>
+
+<div class="flex gap-4 mb-8 overflow-x-auto pb-4">
+<button onclick="filterCars('all')" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold whitespace-nowrap">All (50)</button>
+<button onclick="filterCars('economy')" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition whitespace-nowrap">Economy (10)</button>
+<button onclick="filterCars('luxury')" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition whitespace-nowrap">Luxury (10)</button>
+<button onclick="filterCars('suv')" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition whitespace-nowrap">SUV (10)</button>
+<button onclick="filterCars('sports')" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition whitespace-nowrap">Sports (5)</button>
+<button onclick="filterCars('electric')" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition whitespace-nowrap">Electric (10)</button>
+<button onclick="filterCars('van')" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition whitespace-nowrap">Van (5)</button>
+</div>
+
+<div id="carsGrid" class="grid md:grid-cols-3 gap-8"></div>
+</div>
+</section>
+</div>
+
+<!-- CAR DETAIL PAGE -->
+<div id="detail" class="page pt-20">
+<section class="py-20 bg-gray-50">
+<div class="max-w-7xl mx-auto px-6">
+<button onclick="showPage('fleet')" class="text-blue-600 mb-6 hover:underline flex items-center gap-2">
+← Back to Fleet
+</button>
+
+<div class="grid md:grid-cols-2 gap-8">
+<div class="h-96 bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl flex items-center justify-center text-9xl" id="detailImage">
+🚗
+</div>
+
+<div class="bg-white rounded-3xl p-8 shadow-xl">
+<h1 class="text-4xl font-bold text-gray-900 mb-4" id="detailTitle">Car Name</h1>
+<p class="text-gray-600 mb-2">📍 <span id="detailLocation">Location</span>, Melbourne</p>
+<p class="text-gray-600 mb-6" id="detailRating">Rating</p>
+
+<div class="border-t border-gray-200 py-6 mb-6">
+<div class="flex justify-between mb-2">
+<span class="text-gray-600">Regular Price:</span>
+<span class="text-2xl text-gray-400 line-through" id="detailRegularPrice">$100/day</span>
+</div>
+<div class="flex justify-between">
+<span class="font-semibold text-gray-900">Student Price:</span>
+<span class="text-5xl font-bold text-blue-600"><span id="detailStudentPrice">$50</span><span class="text-2xl">/day</span></span>
+</div>
+<div class="bg-green-50 border-2 border-green-500 px-4 py-3 rounded-xl mt-4 text-center">
+<p class="text-green-700 font-semibold">🎓 You save $<span id="detailSavings">50</span>/day with student discount!</p>
+</div>
+</div>
+
+<button onclick="alert('Sign up to book this car!')" class="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-lg font-bold rounded-xl hover:shadow-2xl transition">
+Book Now
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<!-- STUDENT PAGE -->
+<div id="student" class="page pt-20">
+<section class="py-20">
+<div class="max-w-4xl mx-auto px-6 text-center">
+<div class="inline-block mb-6 px-8 py-4 bg-yellow-100 rounded-full">
+<span class="text-yellow-600 font-bold text-xl">🎓 STUDENT PROGRAM</span>
+</div>
+<h1 class="text-6xl font-bold text-gray-900 mb-6">Save 50% on Every Rental</h1>
+<p class="text-2xl text-gray-600 mb-16">All 50 cars available with student discount!</p>
+
+<div class="bg-white rounded-3xl shadow-2xl p-12 mb-12 text-left">
+<h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">How It Works</h2>
+<div class="space-y-8">
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-2xl">1</div>
+<div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Browse 50 Cars</h3>
+<p class="text-gray-600">See all available cars with 50% discount automatically shown</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-2xl">2</div>
+<div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Sign Up & Verify</h3>
+<p class="text-gray-600">Create account with student email or upload student ID</p>
+</div>
+</div>
+<div class="flex gap-6">
+<div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-2xl">3</div>
+<div>
+<h3 class="text-2xl font-bold text-gray-900 mb-2">Book & Save!</h3>
+<p class="text-gray-600">50% discount applied automatically at checkout</p>
+</div>
+</div>
+</div>
+</div>
+
+<button onclick="showPage('fleet')" class="px-12 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl font-bold rounded-xl hover:shadow-2xl transition">
+Browse 50 Cars Now →
+</button>
+</div>
+</section>
+</div>
+
+<!-- Footer -->
+<footer class="py-12 bg-gray-900 text-white">
+<div class="max-w-7xl mx-auto px-6 text-center">
+<div class="flex items-center justify-center gap-3 mb-4">
+<div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+<span class="text-white text-xl font-bold">CE</span>
+</div>
+<span class="text-2xl font-bold">CarEase</span>
+</div>
+<p class="text-gray-400 mb-2">50 cars • 6 categories • Student discounts</p>
+<p class="text-gray-500 text-sm">&copy; 2025 CarEase. Demo version with 50 cars.</p>
+</div>
+</footer>
+
+</body>
+</html>
